@@ -18,7 +18,7 @@
  .layout{grid-template-columns:minmax(0,1fr) 220px}
  .stagecaption{font-size:18px}
 }
-</style></head><body><main id="board"><div class="top"><span style="color:#fa704b;font-size:25px">✦</span><span class="heading">원의 넓이 탐구</span><span style="color:#fa704b;font-size:25px">✦</span></div><div class="layout"><section class="stage"><div class="drawing"><svg viewBox="0 0 720 510" preserveAspectRatio="xMidYMid meet" role="img" aria-label="원 조각의 모습"><g id="pieces"></g></svg></div><div class="stagefooter"><span id="caption" class="stagecaption">원의 조각 수를 바꾸어 보세요.</span><button id="download" class="download" title="이미지 다운로드" aria-label="배열 이미지 다운로드"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg></button></div></section><aside class="controls"><section class="panel"><div class="label">원의 조각 수</div><div class="count"><span id="count">16</span>개</div><input id="slider" type="range" min="4" max="120" step="2" value="16" aria-label="원의 조각 수 조절"><div class="rangeLabels"><span>4개</span><span>120개</span></div><div class="presets"><button data-n="8">8개</button><button data-n="16" class="active">16개</button><button data-n="32">32개</button><button data-n="64">64개</button></div></section><section class="panel"><div class="label">모양 살펴보기</div><div class="modeButtons"><button id="circle" class="active">◯ 원 관찰하기</button><button id="arrange">▱ 조각 배열하기</button></div></section></aside></div><div class="tray"><span class="marker"></span><span class="marker blue"></span><span class="eraser"></span></div></main>
+</style></head><body><main id="board"><div class="top"><span style="color:#fa704b;font-size:25px">✦</span><span class="heading">원의 넓이 탐구</span><span style="color:#fa704b;font-size:25px">✦</span></div><div class="layout"><section class="stage"><div class="drawing"><svg viewBox="0 0 720 510" preserveAspectRatio="xMidYMid meet" role="img" aria-label="원 조각의 모습"><g id="pieces"></g></svg></div><div class="stagefooter"><span id="caption" class="stagecaption">원의 조각 수를 바꾸어 보세요.</span><button id="download" class="download" title="이미지 다운로드" aria-label="배열 이미지 다운로드"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg></button></div></section><aside class="controls"><section class="panel"><div class="label">원의 조각 수</div><div class="count"><span id="count">16</span>개</div><input id="slider" type="range" min="4" max="240" step="2" value="16" aria-label="원의 조각 수 조절"><div class="rangeLabels"><span>4개</span><span>240개</span></div><div class="presets"><button data-n="8">8개</button><button data-n="16" class="active">16개</button><button data-n="32">32개</button><button data-n="64">64개</button></div></section><section class="panel"><div class="label">모양 살펴보기</div><div class="modeButtons"><button id="circle" class="active">◯ 원 관찰하기</button><button id="arrange">▱ 조각 배열하기</button></div></section></aside></div><div class="tray"><span class="marker"></span><span class="marker blue"></span><span class="eraser"></span></div></main>
 <script>
 (()=>{const $=s=>document.querySelector(s),ns='http://www.w3.org/2000/svg';let n=16,mode='circle',pieces=[],poses=[],frame=0,token=0;const g=$('#pieces'),RED='#f25a5a',BLUE='#5961f7';
 function wedge(){const h=Math.PI/n;return `M0 0 L${Math.cos(-h)} ${Math.sin(-h)} A1 1 0 0 1 ${Math.cos(h)} ${Math.sin(h)} Z`}
@@ -26,39 +26,45 @@ function layout(m){if(m==='circle')return Array.from({length:n},(_,i)=>({x:360,y
 function mat(p){const c=Math.cos(p.a)*p.r,s=Math.sin(p.a)*p.r;return `matrix(${c},${s},${-s},${c},${p.x},${p.y})`}
 function draw(){pieces.forEach((p,i)=>p.setAttribute('transform',mat(poses[i])))}
 function color(i){return mode==='circle'?(i<n/4||i>=3*n/4?RED:BLUE):(i%2===0?RED:BLUE)}
-function recolor(){pieces.forEach((p,i)=>p.setAttribute('fill',color(i)))}
-function rebuild(){cancelAnimationFrame(frame);token++;g.replaceChildren();pieces=[];poses=layout(mode);const d=wedge();for(let i=0;i<n;i++){const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('stroke','#111');p.setAttribute('stroke-width','0.012');p.setAttribute('stroke-linejoin','round');g.appendChild(p);pieces.push(p)}recolor();draw()}
+function recolor(){pieces.forEach((p,i)=>{p.setAttribute('fill',color(i));p.setAttribute('stroke',mode==='circle'?'#111':'none');p.setAttribute('stroke-width',mode==='circle'?'0.012':'0');p.setAttribute('stroke-linejoin','round')})}
+function rebuild(){cancelAnimationFrame(frame);token++;g.replaceChildren();pieces=[];poses=layout(mode);const d=wedge();for(let i=0;i<n;i++){const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('stroke','none');g.appendChild(p);pieces.push(p)}recolor();draw()}
 function change(m){if(mode===m)return;cancelAnimationFrame(frame);const id=++token,from=poses.map(p=>({...p}));mode=m;const to=layout(m),start=performance.now();$('#circle').classList.toggle('active',m==='circle');$('#arrange').classList.toggle('active',m==='arranged');$('#caption').textContent=m==='circle'?'원의 조각 수를 바꾸어 보세요.':'조각 수가 많아질수록 어떤 도형이 되나요?';recolor();function tick(now){if(id!==token)return;const t=Math.min(1,(now-start)/900),e=t*t*(3-2*t);poses=from.map((p,i)=>({x:p.x+(to[i].x-p.x)*e,y:p.y+(to[i].y-p.y)*e,r:p.r+(to[i].r-p.r)*e,a:p.a+(to[i].a-p.a)*e}));draw();if(t<1)frame=requestAnimationFrame(tick);else{poses=to;draw()}}frame=requestAnimationFrame(tick)}
-function setN(v){n=Math.max(4,Math.min(120,Math.round(+v/2)*2));$('#slider').value=n;$('#count').textContent=n;const t=(n-4)/116*100;$('#slider').style.background=`linear-gradient(to right,#087b4a 0%,#087b4a ${t}%,#e4e9e6 ${t}%,#e4e9e6 100%)`;document.querySelectorAll('[data-n]').forEach(b=>b.classList.toggle('active',+b.dataset.n===n));rebuild()}
+function setN(v){n=Math.max(4,Math.min(240,Math.round(+v/2)*2));$('#slider').value=n;$('#count').textContent=n;const t=(n-4)/236*100;$('#slider').style.background=`linear-gradient(to right,#087b4a 0%,#087b4a ${t}%,#e4e9e6 ${t}%,#e4e9e6 100%)`;document.querySelectorAll('[data-n]').forEach(b=>b.classList.toggle('active',+b.dataset.n===n));rebuild()}
 function exportImage(){
- const canvas=document.createElement('canvas'),W=1400,H=840;
+ // 원과 조각 배열을 한 장에 위아래로 저장합니다.
+ const canvas=document.createElement('canvas'),W=1400,H=1600;
  canvas.width=W;canvas.height=H;
  const c=canvas.getContext('2d');
  c.fillStyle='#fcfdfd';c.fillRect(0,0,W,H);
  c.strokeStyle='#d9dee1';c.lineWidth=10;c.strokeRect(12,12,W-24,H-24);
- // 사진 상단에 현재 원의 조각 수를 크게 표시합니다.
- c.fillStyle='#202936';c.textAlign='center';
- c.font="bold 54px 'Malgun Gothic',sans-serif";
- c.fillText(`원의 조각 수: ${n}개`,W/2,98);
- const ps=layout(mode),h=Math.PI/n;
- c.save();
- // 원 모양은 기존보다 작게(지름 약 570px) 배치합니다.
- // 배열된 모양은 화면 안에 넉넉히 들어오도록 별도 배율을 사용합니다.
- if(mode==='circle'){const scale=285/249;c.translate(W/2,455);c.scale(scale,scale);c.translate(-360,-255)}
- else{c.translate(W/2,440);c.scale(1.65,1.65);c.translate(-360,-255)}
- for(let i=0;i<n;i++){
-  const p=ps[i];c.beginPath();c.moveTo(p.x,p.y);
-  c.lineTo(p.x+p.r*Math.cos(p.a-h),p.y+p.r*Math.sin(p.a-h));
-  c.arc(p.x,p.y,p.r,p.a-h,p.a+h);c.closePath();
-  c.fillStyle=mode==='circle'?(i<n/4||i>=3*n/4?RED:BLUE):(i%2===0?RED:BLUE);
-  c.fill();c.strokeStyle='#111';c.lineWidth=1.5;c.stroke();
+ c.textAlign='center';c.fillStyle='#202936';
+ c.font="bold 56px 'Malgun Gothic',sans-serif";
+ c.fillText(`원의 조각 수: ${n}개`,W/2,100);
+ c.font="bold 38px 'Malgun Gothic',sans-serif";
+ c.fillText('원 관찰하기',W/2,188);
+ c.fillText('조각 배열하기',W/2,925);
+ c.strokeStyle='#e2e6e9';c.lineWidth=3;
+ c.beginPath();c.moveTo(100,830);c.lineTo(W-100,830);c.stroke();
+ function paint(m,cx,cy,scale){
+  const ps=layout(m),h=Math.PI/n;
+  c.save();c.translate(cx,cy);c.scale(scale,scale);c.translate(-360,-255);
+  for(let i=0;i<n;i++){
+   const p=ps[i];c.beginPath();c.moveTo(p.x,p.y);
+   c.lineTo(p.x+p.r*Math.cos(p.a-h),p.y+p.r*Math.sin(p.a-h));
+   c.arc(p.x,p.y,p.r,p.a-h,p.a+h);c.closePath();
+   c.fillStyle=m==='circle'?(i<n/4||i>=3*n/4?RED:BLUE):(i%2===0?RED:BLUE);
+   c.fill();
+   if(m==='circle'){c.strokeStyle='#111';c.lineWidth=1.15;c.lineJoin='round';c.stroke();}
+  }
+  c.restore();
  }
- c.restore();
+ // 첫 번째 그림은 지름 약 530px로 작게, 두 번째는 아래쪽에 배치합니다.
+ paint('circle',W/2,505,265/249);
+ paint('arranged',W/2,1230,1.65);
  const filename=`원의_조각_배열_${n}개.png`;
  const dataURL=canvas.toDataURL('image/png');
  const isiPad=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  if(isiPad){
-  // Blob conversion is synchronous so Safari's user gesture is retained for sharing.
   const binary=atob(dataURL.split(',')[1]);
   const bytes=new Uint8Array(binary.length);
   for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
