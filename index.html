@@ -54,9 +54,40 @@ function exportImage(){
   c.fill();c.strokeStyle='#111';c.lineWidth=1.5;c.stroke();
  }
  c.restore();
- const a=document.createElement('a');
- a.download=`원의_조각_배열_${n}개.png`;
- a.href=canvas.toDataURL('image/png');a.click();
+ const filename=`원의_조각_배열_${n}개.png`;
+ const dataURL=canvas.toDataURL('image/png');
+ const isiPad=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(isiPad){
+  // Blob conversion is synchronous so Safari's user gesture is retained for sharing.
+  const binary=atob(dataURL.split(',')[1]);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  const file=new File([bytes],filename,{type:'image/png'});
+  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+   try{
+    const sharing=navigator.share({files:[file]});
+    Promise.resolve(sharing).catch(err=>{if(err.name!=='AbortError')showImagePreview(dataURL,filename)});
+    return;
+   }catch(e){}
+  }
+  showImagePreview(dataURL,filename);
+  return;
+ }
+ const a=document.createElement('a');a.download=filename;a.href=dataURL;
+ document.body.appendChild(a);a.click();a.remove();
+}
+function showImagePreview(dataURL,filename){
+ let overlay=document.getElementById('iosImagePreview');
+ if(!overlay){
+  overlay=document.createElement('div');overlay.id='iosImagePreview';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(14,25,35,.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:18px;';
+  const info=document.createElement('div');info.style.cssText='color:white;font:600 16px sans-serif;text-align:center;line-height:1.5';info.textContent='이미지를 길게 누른 뒤 ‘사진에 저장’을 선택하세요.';
+  const img=document.createElement('img');img.style.cssText='display:block;max-width:100%;max-height:73vh;object-fit:contain;background:white;border-radius:8px';img.alt='저장할 원의 넓이 탐구 이미지';
+  const close=document.createElement('button');close.type='button';close.textContent='닫기';close.style.cssText='background:white;color:#183e2d;border:0;border-radius:10px;padding:12px 34px;font-size:17px;font-weight:700';close.onclick=()=>overlay.remove();
+  overlay.append(info,img,close);document.body.appendChild(overlay);
+ }
+ overlay.querySelector('img').src=dataURL;
+ overlay.querySelector('img').alt=filename;
 }
 $('#slider').addEventListener('input',e=>setN(e.target.value));document.querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>setN(b.dataset.n)));$('#circle').addEventListener('click',()=>change('circle'));$('#arrange').addEventListener('click',()=>change('arranged'));$('#download').addEventListener('click',exportImage);setN(16)})();
 </script></body></html>
